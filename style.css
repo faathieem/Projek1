@@ -1,0 +1,40 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #0b0f19; /* Warna Malam Gelap */
+    color: #00ffaa; /* Warna Teks Neon Hijau */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.kokpit-container {
+    background-color: #1a233b; /* Background Kokpit */
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 50px rgba(0, 255, 170, 0.3); /* Cahaya Neon */
+    text-align: center;
+}
+
+.timer-display {
+    font-size: 8em;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.controls button {
+    background-color: #ff5757; /* Warna Tombol Merah */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.controls button:hover {
+    background-color: #e64a4a;
+}
