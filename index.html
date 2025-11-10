@@ -7,21 +7,35 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div class="kokpit-container">
-        <h1>MISI: BELAJAR!</h1>
-        <div id="mission-display">Tugas: Trigonometri Berat</div>
+        <h1>FOKUS-PILOT</h1>
+        <div id="mission-display">Tugas: Menentukan Misi...</div>
+        
+        <div class="score-board">
+            <h2>Poin Fokus: <span id="focus-points">0</span></h2>
+            <div id="turbulence-status">Status: Stabil.</div>
+        </div>
 
         <div class="timer-display">
             <span id="minutes">45</span>:<span id="seconds">00</span>
         </div>
 
         <div class="controls">
-            <button id="start-btn">TERBANG (Mulai Fokus)</button>
-            <button id="pause-btn" disabled>TUNDA (Jeda)</button>
-            <button id="reset-btn">MENDARAT (Selesai)</button>
+            <button id="start-btn" class="action-btn">TERBANG (Mulai Fokus)</button>
+            <button id="reset-btn" class="action-btn">MENDARAT (Selesai)</button>
         </div>
 
-        <div id="log-message">Status: Siap Lepas Landas.</div>
+        <div id="log-message">Siap Lepas Landas. Atur Misi di console.</div>
+    </div>
+    
+    <div id="break-modal" class="modal">
+        <div class="modal-content">
+            <h3>🛬 Waktunya Micro-Break Challenge!</h3>
+            <p id="break-challenge-text"></p>
+            <div id="break-timer">10:00</div>
+            <button id="continue-btn">LANJUTKAN MISI</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
