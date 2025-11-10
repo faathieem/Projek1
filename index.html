@@ -10,7 +10,20 @@
 
     <div class="kokpit-container">
         <h1>FOKUS-PILOT</h1>
-        <div id="mission-display">Tugas: Menentukan Misi...</div>
+
+        <div class="mission-setup">
+            <h3>Atur Misi Penerbangan 🛫</h3>
+            <input type="text" id="task-input" placeholder="Tugas yang akan dikerjakan (Contoh: Bab 5 Biologi)">
+            <input type="number" id="focus-min-input" value="45" min="5" max="180">
+            <label for="focus-min-input">Menit Fokus</label>
+            <input type="number" id="break-min-input" value="10" min="1" max="60">
+            <label for="break-min-input">Menit Istirahat</label>
+        </div>
+        
+        <hr>
+
+        <div id="mission-display">Misi: Belum diatur.</div>
+        <div id="status-display">Status: Siap diatur.</div>
         
         <div class="score-board">
             <h2>Poin Fokus: <span id="focus-points">0</span></h2>
@@ -18,22 +31,22 @@
         </div>
 
         <div class="timer-display">
-            <span id="minutes">45</span>:<span id="seconds">00</span>
+            <span id="minutes">00</span>:<span id="seconds">00</span>
         </div>
 
         <div class="controls">
             <button id="start-btn" class="action-btn">TERBANG (Mulai Fokus)</button>
-            <button id="reset-btn" class="action-btn">MENDARAT (Selesai)</button>
+            <button id="reset-btn" class="action-btn" disabled>MENDARAT (Selesai)</button>
         </div>
 
-        <div id="log-message">Siap Lepas Landas. Atur Misi di console.</div>
+        <div id="log-message">Tekan "TERBANG" untuk memulai misi.</div>
     </div>
     
     <div id="break-modal" class="modal">
         <div class="modal-content">
             <h3>🛬 Waktunya Micro-Break Challenge!</h3>
             <p id="break-challenge-text"></p>
-            <div id="break-timer">10:00</div>
+            <div id="break-timer"></div>
             <button id="continue-btn">LANJUTKAN MISI</button>
         </div>
     </div>
