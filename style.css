@@ -1,7 +1,7 @@
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #0b0f19; /* Warna Malam Gelap */
-    color: #00ffaa; /* Warna Teks Neon Hijau */
+    background-color: #0d1117; /* Latar Belakang Gelap */
+    color: #c9d1d9; /* Teks Putih Pudar */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -10,31 +10,108 @@ body {
 }
 
 .kokpit-container {
-    background-color: #1a233b; /* Background Kokpit */
+    background-color: #161b22; /* Kontainer Kokpit */
     padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 0 50px rgba(0, 255, 170, 0.3); /* Cahaya Neon */
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(45, 126, 255, 0.2); /* Efek Cahaya */
     text-align: center;
+    width: 90%;
+    max-width: 500px;
+}
+
+h1 {
+    color: #2d7eff; /* Warna Biru Fokus */
+    margin-bottom: 10px;
+}
+
+#mission-display {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: #79c0ff;
+}
+
+.score-board {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #0d1117;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+}
+
+#focus-points {
+    color: #56d364; /* Hijau Poin */
+}
+
+#turbulence-status {
+    color: #ffa657; /* Oranye Peringatan */
+    font-weight: bold;
+    margin-top: 5px;
 }
 
 .timer-display {
-    font-size: 8em;
+    font-size: 5em;
     font-weight: bold;
-    margin: 20px 0;
+    margin: 30px 0;
+    color: #f0f6fc;
 }
 
 .controls button {
-    background-color: #ff5757; /* Warna Tombol Merah */
-    color: white;
-    padding: 10px 20px;
+    padding: 12px 25px;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     margin: 5px;
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s;
 }
 
-.controls button:hover {
-    background-color: #e64a4a;
+#start-btn {
+    background-color: #2d7eff;
+    color: white;
+}
+#start-btn:hover:not(:disabled) { background-color: #1f6feb; }
+
+#reset-btn {
+    background-color: #586069;
+    color: white;
+}
+#reset-btn:hover:not(:disabled) { background-color: #444c56; }
+
+/* Gaya untuk Modal (Micro-Break) */
+.modal {
+    display: none; /* Sembunyikan secara default */
+    position: fixed; 
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.8); /* Latar Belakang Gelap */
+}
+
+.modal-content {
+    background-color: #161b22;
+    margin: 15% auto; 
+    padding: 30px;
+    border: 1px solid #2d7eff;
+    width: 80%; 
+    border-radius: 10px;
+    text-align: center;
+}
+
+#break-timer {
+    font-size: 2.5em;
+    margin: 15px 0;
+    color: #56d364;
+}
+
+#continue-btn {
+    background-color: #56d364;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
 }
