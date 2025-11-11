@@ -1,25 +1,32 @@
 // ===================================================
-// 1. Setup Variabel dan Elemen (Termasuk Input Baru)
+// 1. Setup Variabel dan Elemen
 // ===================================================
 const minutesDisplay = document.getElementById('minutes');
 const secondsDisplay = document.getElementById('seconds');
 const focusPointsDisplay = document.getElementById('focus-points');
 const turbulenceStatus = document.getElementById('turbulence-status');
 const logMessage = document.getElementById('log-message');
-const statusDisplay = document.getElementById('status-display'); // Elemen Status Baru
+const statusDisplay = document.getElementById('status-display');
 const startBtn = document.getElementById('start-btn');
 const resetBtn = document.getElementById('reset-btn');
 
-// Input Formulir Misi Baru
+// Input Formulir Misi
+const missionForm = document.getElementById('mission-form');
 const taskInput = document.getElementById('task-input');
 const focusMinInput = document.getElementById('focus-min-input');
 const breakMinInput = document.getElementById('break-min-input');
 const missionDisplay = document.getElementById('mission-display');
+const setupBtn = document.getElementById('setup-btn');
 
+// Modal dan Kontrol Break
 const breakModal = document.getElementById('break-modal');
 const breakChallengeText = document.getElementById('break-challenge-text');
 const breakTimerDisplay = document.getElementById('break-timer');
 const continueBtn = document.getElementById('continue-btn');
+const reportModal = document.getElementById('report-modal');
+const reportDetails = document.getElementById('report-details');
+const closeReportBtn = document.getElementById('close-report-btn');
+
 
 // Variabel Kontrol
 let totalSeconds = 0;
@@ -27,9 +34,10 @@ let focusDurationSec = 0;
 let breakDurationSec = 0;
 let intervalId;
 let focusPoints = 0;
-let isFocusSession = true; // Status: true = Fokus, false = Break
-let isPaused = true;
-let accuracyLog = 0; // Hitungan turbulensi
+let isFocusSession = true;
+let isRunning = false;
+let accuracyLog = 0; 
+let currentTask = "";
 
 // Data Misi dan Challenge
 const microBreakChallenges = [
@@ -40,53 +48,195 @@ const microBreakChallenges = [
     "5 menit menggambar doodle konyol di kertas bekas."
 ];
 
-// Inisialisasi Tampilan Awal
-missionDisplay.textContent = Misi: Belum diatur.;
-statusDisplay.textContent = Status: Masukkan data misi.;
-minutesDisplay.textContent = String(focusMinInput.value).padStart(2, '0');
-secondsDisplay.textContent = '00';
-
 
 // ===================================================
-// 2. Fungsi Utama Timer (Tidak Berubah)
+// 2. Fungsi Utama Timer
 // ===================================================
+
+// Mengupdate tampilan timer
+function renderTimer(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    const formattedTime = ${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')};
+    
+    minutesDisplay.textContent = String(minutes).padStart(2, '0');
+    secondsDisplay.textContent = String(secs).padStart(2, '0');
+    breakTimerDisplay.textContent = formattedTime; // Update timer di modal
+}
+
+// Logika hitungan mundur
 function updateTimer() {
     if (totalSeconds <= 0) {
         clearInterval(intervalId);
+        isRunning = false;
         
         if (isFocusSession) {
-            // Sesi Fokus Selesai -> Mulai Break
             startBreak();
         } else {
-            // Sesi Break Selesai -> Selesaikan Misi
-            finishMission();
+            // Break selesai
+            continueBtn.disabled = false; // Aktifkan tombol LANJUTKAN MISI
+            breakTimerDisplay.textContent = "00:00";
+            statusDisplay.textContent = Status: ISTIRAHAT SELESAI. Tekan LANJUTKAN.;
         }
         return;
     }
-
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-
-    // Update tampilan timer utama dan timer break
-    minutesDisplay.textContent = String(minutes).padStart(2, '0');
-    secondsDisplay.textContent = String(seconds).padStart(2, '0');
-    breakTimerDisplay.textContent = ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')};
-
+    
+    // Logika Poin
     if (isFocusSession) {
-        focusPoints += 1; // Tambah Poin Fokus
+        focusPoints += 1; 
         focusPointsDisplay.textContent = focusPoints;
-        statusDisplay.textContent = Status: FOKUS! (${minutes}m tersisa); // Update Status
+        statusDisplay.textContent = Status: FOKUS! (${Math.ceil(totalSeconds / 60)}m tersisa);
     } else {
-        statusDisplay.textContent = Status: ISTIRAHAT (${minutes}m tersisa); // Update Status Break
+        statusDisplay.textContent = Status: ISTIRAHAT (${Math.ceil(totalSeconds / 60)}m tersisa);
     }
 
+    renderTimer(totalSeconds);
     totalSeconds--;
 }
 
-// ... (Fungsi handleTurbulence dan handleStabilize sama persis) ...
+// Fungsi menjalankan timer
+function runTimer() {
+    if (isRunning) return; // Mencegah multiple interval
+    
+    isRunning = true;
+    intervalId = setInterval(updateTimer, 1000);
+    logMessage.textContent = isFocusSession ? "TERBANG DIMULAI! Jaga Ketinggian Fokus." : "ISTIRAHAT DIMULAI!";
+    
+    startBtn.disabled = true;
+    resetBtn.disabled = false;
+}
+
+// ===================================================
+// 3. Transisi Sesi
+// ===================================================
+
+// Atur Misi Awal
+function setupMission(event) {
+    event.preventDefault(); // Mencegah form submission default
+    
+    currentTask = taskInput.value.trim();
+    const focusMinutes = parseInt(focusMinInput.value);
+    const breakMinutes = parseInt(breakMinInput.value);
+
+    // Validasi dasar (HTML 'required' dan 'min' seharusnya sudah membantu)
+    if (!currentTask || focusMinutes < 5 || breakMinutes < 1) {
+        alert("Pilot, pastikan semua input terisi dengan benar!");
+        return;
+    }
+    
+    focusDurationSec = focusMinutes * 60;
+    breakDurationSec = breakMinutes * 60;
+    
+    // Set sesi awal (Fokus)
+    totalSeconds = focusDurationSec;
+    isFocusSession = true;
+    
+    // Update Tampilan Misi
+    missionDisplay.textContent = Misi: ${currentTask};
+    statusDisplay.textContent = Status: SIAP TERBANG.;
+    renderTimer(totalSeconds);
+    
+    // Kontrol UI
+    startBtn.disabled = false; // Aktifkan tombol TERBANG
+    resetBtn.disabled = true;
+    logMessage.textContent = "Siap Lepas Landas! Tekan 'TERBANG' untuk memulai.";
+    
+    // Nonaktifkan pengaturan sampai misi di-reset/selesai
+    taskInput.disabled = true;
+    focusMinInput.disabled = true;
+    breakMinInput.disabled = true;
+    setupBtn.disabled = true;
+}
+
+// Mulai Sesi Istirahat
+function startBreak() {
+    isFocusSession = false;
+    totalSeconds = breakDurationSec; 
+    continueBtn.disabled = true; // Nonaktifkan tombol sampai break selesai
+
+    // Tampilkan Modal Break
+    breakModal.style.display = 'block';
+    const challenge = microBreakChallenges[Math.floor(Math.random() * microBreakChallenges.length)];
+    breakChallengeText.textContent = challenge;
+    
+    logMessage.textContent = "🛬 Waktunya Micro-Break. Lakukan challenge di modal!";
+    
+    // Mulai timer break
+    runTimer();
+}
+
+// Laporan Penerbangan
+function finishMission() {
+    breakModal.style.display = 'none'; // Tutup break modal
+    
+    const finalFocusMinutes = focusDurationSec / 60;
+    const badge = accuracyLog <= 5 ? "Pilot Konsisten 🏅" : "Pilot Tangguh 💪";
+    
+    const report = `
+Tugas: ${currentTask}
+Durasi Fokus: ${finalFocusMinutes} Menit
+Total Poin Fokus: ${focusPoints}
+Akurasi Fokus (Turbulensi): ${accuracyLog} kali
+Lencana: ${badge}
+    `;
+    
+    reportDetails.textContent = report;
+    reportModal.style.display = 'block';
+    
+    logMessage.textContent = "Misi Selesai. Laporan telah dibuat.";
+
+    // Lakukan reset total setelah laporan dilihat
+    resetMission(false); 
+}
+
+// Tombol Reset (MENDARAT)
+function resetMission(fullReset = true) {
+    clearInterval(intervalId);
+    isRunning = false;
+    isFocusSession = true;
+
+    startBtn.disabled = true;
+    resetBtn.disabled = true;
+    breakModal.style.display = 'none'; 
+    reportModal.style.display = 'none';
+    
+    // Aktifkan kembali pengaturan
+    taskInput.disabled = false;
+    focusMinInput.disabled = false;
+    breakMinInput.disabled = false;
+    setupBtn.disabled = false;
+
+    if (fullReset) {
+        // Reset skor dan timer ke nilai input
+        totalSeconds = focusMinInput.value * 60;
+        focusPoints = 0;
+        accuracyLog = 0;
+        focusPointsDisplay.textContent = 0;
+        missionDisplay.textContent = Misi: Belum diatur.;
+        statusDisplay.textContent = "Status: Atur Misi & Siap Terbang.";
+        logMessage.textContent = "Misi Dibatalkan. Siap Lepas Landas Ulang.";
+    } else {
+         // Reset setelah finish, siap untuk misi baru
+        totalSeconds = focusMinInput.value * 60;
+        focusPoints = 0;
+        accuracyLog = 0;
+        focusPointsDisplay.textContent = 0;
+        missionDisplay.textContent = Misi: Belum diatur.;
+        statusDisplay.textContent = "Status: Atur Misi & Siap Terbang.";
+        logMessage.textContent = "Misi sebelumnya selesai. Atur Misi Baru.";
+    }
+    
+    renderTimer(totalSeconds);
+    turbulenceStatus.textContent = "Status: Stabil.";
+}
+
+// ===================================================
+// 4. Logika Turbulensi (Window Focus)
+// ===================================================
+
 function handleTurbulence() {
-    if (!isPaused && isFocusSession) {
-        focusPoints -= 10; 
+    if (isRunning && isFocusSession) {
+        focusPoints = Math.max(0, focusPoints - 10); // Pastikan poin tidak negatif
         accuracyLog++;
         focusPointsDisplay.textContent = focusPoints;
         turbulenceStatus.textContent = "⚠️ TURBULENSI! Poin -10. Kembali ke Kokpit!";
@@ -94,122 +244,26 @@ function handleTurbulence() {
     }
 }
 function handleStabilize() {
-    if (!isPaused && isFocusSession) {
+    if (isRunning && isFocusSession) {
         turbulenceStatus.textContent = "Status: Stabil. Lanjutkan Misi.";
     }
 }
+
+// ===================================================
+// 5. Event Listeners
+// ===================================================
+missionForm.addEventListener('submit', setupMission);
+startBtn.addEventListener('click', runTimer);
+resetBtn.addEventListener('click', () => resetMission(true));
+continueBtn.addEventListener('click', finishMission);
+closeReportBtn.addEventListener('click', () => {
+    reportModal.style.display = 'none';
+});
+
+// Listener Turbulensi
 window.addEventListener('blur', handleTurbulence);
 window.addEventListener('focus', handleStabilize);
 
-
-// ===================================================
-// 3. Transisi & Laporan Misi (Logika Baru di startMission)
-// ===================================================
-
-// Fungsi untuk menyiapkan dan memulai sesi fokus
-function startMission() {
-    const task = taskInput.value.trim();
-    const focusMinutes = parseInt(focusMinInput.value);
-    const breakMinutes = parseInt(breakMinInput.value);
-
-    // Validasi input
-    if (task === "" || focusMinutes < 5 || breakMinutes < 1) {
-        alert("Pilot, pastikan Nama Tugas dan Durasi waktu fokus/istirahat terisi dengan benar!");
-        return;
-    }
-
-    // Atur Waktu Fokus dan Break dari Input
-    focusDurationSec = focusMinutes * 60;
-    breakDurationSec = breakMinutes * 60;
-    totalSeconds = focusDurationSec;
-    
-    // Update Tampilan Misi
-    missionDisplay.textContent = Misi: ${task};
-    statusDisplay.textContent = Status: Siap diaktifkan.;
-    minutesDisplay.textContent = String(focusMinutes).padStart(2, '0');
-    secondsDisplay.textContent = '00';
-    
-    // Mulai Timer
-    if (isPaused) {
-        intervalId = setInterval(updateTimer, 1000); 
-        logMessage.textContent = "TERBANG DIMULAI! Jaga Ketinggian Fokus.";
-        isPaused = false;
-        startBtn.disabled = true;
-        resetBtn.disabled = false; // Aktifkan tombol MENDARAT
-        
-        // Nonaktifkan pengaturan selama misi berjalan
-        taskInput.disabled = true;
-        focusMinInput.disabled = true;
-        breakMinInput.disabled = true;
-    }
-}
-
-// Mulai Sesi Istirahat
-function startBreak() {
-    isFocusSession = false;
-    totalSeconds = breakDurationSec; // Gunakan durasi break dari input
-    
-    breakModal.style.display = 'block';
-    const challenge = microBreakChallenges[Math.floor(Math.random() * microBreakChallenges.length)];
-    breakChallengeText.textContent = challenge;
-    
-    logMessage.textContent = "Penting! Lakukan Micro-Break Challenge yang muncul di layar.";
-    
-    intervalId = setInterval(updateTimer, 1000); 
-}
-
-// Sesi Break Selesai -> Reset untuk Misi Baru
-function finishMission() {
-    // Ambil data tugas terakhir
-    const finalTask = missionDisplay.textContent.replace('Misi: ', '');
-    
-    const report = `
-        Misi Selesai: ${finalTask}
-        Durasi Fokus: ${focusDurationSec / 60} Menit
-        Total Poin Fokus: ${focusPoints}
-        Akurasi Fokus (Gagal Tab): ${accuracyLog} kali
-        Lencana: ${accuracyLog <= 5 ? "Pilot Konsisten" : "Pilot Tangguh"}
-    `;
-    logMessage.innerHTML = <h3>✅ LAPORAN PENERBANGAN:</h3><pre>${report}</pre>;
-    
-    resetMission(false); // Reset visual, jangan hapus log
-}
-
-// Tombol Reset (MENDARAT)
-function resetMission(fullReset = true) {
-    clearInterval(intervalId);
-    isPaused = true;
-    isFocusSession = true;
-    startBtn.disabled = false;
-    resetBtn.disabled = true;
-    breakModal.style.display = 'none'; 
-    
-    // Aktifkan kembali pengaturan
-    taskInput.disabled = false;
-    focusMinInput.disabled = false;
-    breakMinInput.disabled = false;
-    
-    if (fullReset) {
-        // Reset skor dan timer ke nilai input
-        totalSeconds = focusMinInput.value * 60;
-        focusPoints = 0;
-        accuracyLog = 0;
-        focusPointsDisplay.textContent = 0;
-        minutesDisplay.textContent = String(focusMinInput.value).padStart(2, '0');
-        secondsDisplay.textContent = '00';
-        logMessage.textContent = "Misi Dibatalkan. Siap Lepas Landas Ulang.";
-        missionDisplay.textContent = Misi: ${taskInput.value.trim() || 'Belum diatur.'};
-        statusDisplay.textContent = "Status: Siap diaktifkan.";
-    }
-    turbulenceStatus.textContent = "Status: Stabil.";
-}
-
-// ===================================================
-// 4. Event Listeners
-// ===================================
-startBtn.addEventListener('click', startMission);
-resetBtn.addEventListener('click', () => resetMission(true));
-continueBtn.addEventListener('click', () => {
-    // Ketika Micro-Break selesai, tampilkan laporan dan reset
-    finishMission();
-});
+// Inisialisasi Tampilan Awal
+renderTimer(parseInt(focusMinInput.value) * 60);
+focusPointsDisplay.textContent = focusPoints;
